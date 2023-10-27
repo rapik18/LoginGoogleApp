@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">TK4-Team4</string>
+    <string name="web_client_id">797207428086-i5ed29jquduung09ds64e0vq42kelu0b.apps.googleusercontent.com</string>
+    <string name="title_activity_maps">MapsActivity</string>
+</resources>
