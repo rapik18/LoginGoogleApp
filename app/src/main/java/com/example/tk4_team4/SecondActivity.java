@@ -1,5 +1,6 @@
 package com.example.tk4_team4;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
@@ -8,6 +9,7 @@ import android.content.Intent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.tk4_team4.databinding.ActivityMapsBinding;
 import com.example.tk4_team4.databinding.ActivitySecondBinding;
@@ -22,7 +24,9 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class SecondActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -51,7 +55,9 @@ public class SecondActivity extends FragmentActivity implements OnMapReadyCallba
         signOutBtn = findViewById(R.id.signout);
 
 
-        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
         gsc = GoogleSignIn.getClient(this,gso);
 
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
@@ -68,17 +74,29 @@ public class SecondActivity extends FragmentActivity implements OnMapReadyCallba
                 signOut();
             }
         });
-
-
-
     }
 
     void signOut(){
         gsc.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(Task<Void> task) {
-                finish();
-                startActivity(new Intent(SecondActivity.this,MainActivity.class));
+                //Sign out
+                FirebaseAuth.getInstance().addAuthStateListener(new FirebaseAuth.AuthStateListener() {
+                    @Override
+                    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                        if (firebaseAuth.getCurrentUser() == null) {
+                            gsc.signOut().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Toast.makeText(SecondActivity.this, "Signed out successfully", Toast.LENGTH_SHORT).show();
+                                    //Opening MainActivity to sign in again
+                                    startActivity(new Intent(SecondActivity.this, MainActivity.class));
+                                }
+                            });
+                        }
+                    }
+                });
+                FirebaseAuth.getInstance().signOut();
             }
         });
     }
